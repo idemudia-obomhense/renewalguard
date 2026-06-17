@@ -1,0 +1,67 @@
+import { Activity, CalendarClock, AlertTriangle, Wallet } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/format'
+import type { DashboardStats } from '@/types'
+
+interface StatsCardsProps {
+  stats: DashboardStats
+}
+
+const CARD_CONFIG = [
+  {
+    key:       'total_active' as const,
+    label:     'Active Renewals',
+    icon:      Activity,
+    color:     'text-blue-600',
+    bg:        'bg-blue-50',
+    darkColor: 'dark:text-blue-400',
+    darkBg:    'dark:bg-blue-950/40',
+  },
+  {
+    key:       'due_this_month' as const,
+    label:     'Due This Month',
+    icon:      CalendarClock,
+    color:     'text-amber-600',
+    bg:        'bg-amber-50',
+    darkColor: 'dark:text-amber-400',
+    darkBg:    'dark:bg-amber-950/40',
+  },
+  {
+    key:       'overdue' as const,
+    label:     'Overdue',
+    icon:      AlertTriangle,
+    color:     'text-red-600',
+    bg:        'bg-red-50',
+    darkColor: 'dark:text-red-400',
+    darkBg:    'dark:bg-red-950/40',
+  },
+]
+
+export function StatsCards({ stats }: StatsCardsProps) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {CARD_CONFIG.map(({ key, label, icon: Icon, color, bg, darkColor, darkBg }) => (
+        <div key={key} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">{label}</p>
+            <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${bg} ${color} ${darkBg} ${darkColor}`}>
+              <Icon className="h-[18px] w-[18px]" />
+            </span>
+          </div>
+          <p className="text-2xl font-semibold text-foreground">{stats[key]}</p>
+        </div>
+      ))}
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-medium text-muted-foreground">Est. Annual Spend</p>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <Wallet className="h-[18px] w-[18px]" />
+          </span>
+        </div>
+        <p className="text-2xl font-semibold text-foreground">
+          {formatCurrency(stats.estimated_spend, stats.currency)}
+        </p>
+      </div>
+    </div>
+  )
+}

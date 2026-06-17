@@ -1,0 +1,24 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { createClient } from '@/lib/supabase/server'
+
+export async function markNotificationReadAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const supabase = await createClient()
+  await supabase.from('notifications').update({ read: true }).eq('id', id)
+
+  revalidatePath('/dashboard', 'layout')
+}
+
+export async function markAllNotificationsReadAction(): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false)
+
+  revalidatePath('/dashboard', 'layout')
+}
