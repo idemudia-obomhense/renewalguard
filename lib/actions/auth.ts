@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrencyForCountry } from '@/lib/constants'
 import type { ActionResult } from '@/types'
 
 function getSiteUrl(): string {
@@ -39,12 +40,14 @@ export async function signUpAction(
 ): Promise<ActionResult> {
   const fullName = String(formData.get('fullName') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim()
+  const country = String(formData.get('country') ?? '').trim()
   const password = String(formData.get('password') ?? '')
   const confirmPassword = String(formData.get('confirmPassword') ?? '')
 
   const fieldErrors: Partial<Record<string, string[]>> = {}
   if (!fullName) fieldErrors.fullName = ['Full name is required.']
   if (!email) fieldErrors.email = ['Email is required.']
+  if (!country) fieldErrors.country = ['Country is required.']
   if (password.length < 8) fieldErrors.password = ['Password must be at least 8 characters.']
   if (password !== confirmPassword) fieldErrors.confirmPassword = ['Passwords do not match.']
 
@@ -52,12 +55,14 @@ export async function signUpAction(
     return { success: false, error: 'Please fix the errors below.', fieldErrors }
   }
 
+  const currency = getCurrencyForCountry(country)
+
   const supabase = await createClient()
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { full_name: fullName },
+      data: { full_name: fullName, country, currency },
       emailRedirectTo: `${getSiteUrl()}/auth/confirm?next=/dashboard`,
     },
   })

@@ -50,7 +50,7 @@ const VALID_FREQUENCIES: RenewalFrequency[] = ['one_time', 'monthly', 'quarterly
 const VALID_CURRENCY_CODES = SUPPORTED_CURRENCIES.map(c => c.code)
 
 function parseReminderDays(formData: FormData): number[] {
-  return formData.getAll('reminder_days').map(Number).filter(n => Number.isFinite(n) && n > 0)
+  return formData.getAll('reminder_days').map(Number).filter(n => Number.isFinite(n) && n >= 0)
 }
 
 function validateRenewalInput(formData: FormData) {

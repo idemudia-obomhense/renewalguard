@@ -187,7 +187,7 @@ export function RenewalForm({ action, renewal, defaultReminderDays, defaultCurre
                 defaultChecked={selectedReminderDays.has(days)}
                 className="h-3.5 w-3.5 accent-primary"
               />
-              {days === 1 ? '1 day' : `${days} days`}
+              {days === 0 ? 'Today' : days === 1 ? '1 day' : `${days} days`}
             </label>
           ))}
         </div>

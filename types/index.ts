@@ -51,6 +51,7 @@ export type RenewalUrgency = 'active' | 'expiring_soon' | 'overdue' | 'archived'
 export interface Profile {
   id: string
   full_name: string
+  country: string | null
   timezone: string
   currency: string
   date_format: DateFormat

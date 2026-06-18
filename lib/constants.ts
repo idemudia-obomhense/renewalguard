@@ -12,7 +12,7 @@ import type {
 export const EXPIRING_SOON_DAYS = 30
 
 /* ── Reminder day presets ───────────────────────────────────────────────── */
-export const REMINDER_DAY_OPTIONS: number[] = [1, 3, 7, 14, 30, 60, 90]
+export const REMINDER_DAY_OPTIONS: number[] = [0, 1, 3, 7, 14, 30, 60, 90]
 
 export const DEFAULT_REMINDER_DAYS: number[] = [7, 30]
 
@@ -35,6 +35,42 @@ export const SUPPORTED_CURRENCIES: { code: string; label: string; symbol: string
   { code: 'GHS', label: 'Ghanaian Cedi',      symbol: 'GH₵'},
   { code: 'KES', label: 'Kenyan Shilling',    symbol: 'KSh'},
 ]
+
+/* ── Countries → default currency ───────────────────────────────────────── */
+export const COUNTRY_CURRENCY_MAP: { country: string; currency: string }[] = [
+  { country: 'Nigeria',        currency: 'NGN' },
+  { country: 'United States',  currency: 'USD' },
+  { country: 'United Kingdom', currency: 'GBP' },
+  { country: 'Ghana',          currency: 'GHS' },
+  { country: 'Kenya',          currency: 'KES' },
+  { country: 'South Africa',   currency: 'ZAR' },
+  { country: 'Japan',          currency: 'JPY' },
+  { country: 'Canada',         currency: 'CAD' },
+  { country: 'Australia',      currency: 'AUD' },
+  // Europe → EUR
+  { country: 'Austria',     currency: 'EUR' },
+  { country: 'Belgium',     currency: 'EUR' },
+  { country: 'Denmark',     currency: 'EUR' },
+  { country: 'Finland',     currency: 'EUR' },
+  { country: 'France',      currency: 'EUR' },
+  { country: 'Germany',     currency: 'EUR' },
+  { country: 'Greece',      currency: 'EUR' },
+  { country: 'Ireland',     currency: 'EUR' },
+  { country: 'Italy',       currency: 'EUR' },
+  { country: 'Netherlands', currency: 'EUR' },
+  { country: 'Norway',      currency: 'EUR' },
+  { country: 'Poland',      currency: 'EUR' },
+  { country: 'Portugal',    currency: 'EUR' },
+  { country: 'Spain',       currency: 'EUR' },
+  { country: 'Sweden',      currency: 'EUR' },
+  { country: 'Switzerland', currency: 'EUR' },
+  // Fallback for anything not explicitly mapped above
+  { country: 'Other', currency: DEFAULT_CURRENCY },
+]
+
+export function getCurrencyForCountry(country: string): string {
+  return COUNTRY_CURRENCY_MAP.find(c => c.country === country)?.currency ?? DEFAULT_CURRENCY
+}
 
 /* ── Category metadata ──────────────────────────────────────────────────── */
 export const CATEGORY_META: Record<RenewalCategory, CategoryMeta> = {

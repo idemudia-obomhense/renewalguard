@@ -109,9 +109,15 @@ export function initials(name: string): string {
 
 export function formatReminderDays(days: number[]): string {
   if (days.length === 0) return 'No reminders'
+  // "before" is folded into each label individually rather than appended
+  // once to the joined string, since "the same day" (0) can't take a
+  // "before" suffix the way "N days" can.
   const labels = days
     .slice()
     .sort((a, b) => a - b)
-    .map(d => (d === 1 ? '1 day' : `${d} days`))
-  return labels.join(', ') + ' before'
+    .map(d => {
+      if (d === 0) return 'the same day'
+      return d === 1 ? '1 day before' : `${d} days before`
+    })
+  return labels.join(', ')
 }

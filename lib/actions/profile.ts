@@ -53,7 +53,7 @@ export async function updatePreferencesAction(
   const default_reminder_days = formData
     .getAll('default_reminder_days')
     .map(Number)
-    .filter(n => Number.isFinite(n) && n > 0)
+    .filter(n => Number.isFinite(n) && n >= 0)
 
   const fieldErrors: Partial<Record<string, string[]>> = {}
   if (!currency) fieldErrors.currency = ['Currency is required.']

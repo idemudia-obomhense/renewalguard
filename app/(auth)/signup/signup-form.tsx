@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import { signUpAction } from '@/lib/actions/auth'
+import { COUNTRY_CURRENCY_MAP } from '@/lib/constants'
 import type { ActionResult } from '@/types'
 
 const initialState: ActionResult = { success: false }
@@ -54,6 +55,32 @@ export function SignupForm() {
         />
         {state.fieldErrors?.email && (
           <p className="mt-1 text-xs text-danger-600">{state.fieldErrors.email[0]}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="country" className="mb-1.5 block text-sm font-medium text-foreground">
+          Country
+        </label>
+        <select
+          id="country"
+          name="country"
+          defaultValue=""
+          required
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="" disabled>
+            Select your country
+          </option>
+          {COUNTRY_CURRENCY_MAP.map(c => (
+            <option key={c.country} value={c.country}>
+              {c.country}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-muted-foreground">Sets your default currency for renewals.</p>
+        {state.fieldErrors?.country && (
+          <p className="mt-1 text-xs text-danger-600">{state.fieldErrors.country[0]}</p>
         )}
       </div>
 
