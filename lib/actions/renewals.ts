@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { DEFAULT_REMINDER_DAYS } from '@/lib/constants'
+import { DEFAULT_CURRENCY, DEFAULT_REMINDER_DAYS, SUPPORTED_CURRENCIES } from '@/lib/constants'
 import { getReminderDate } from '@/lib/utils/date'
 import type { ActionResult, RenewalCategory, RenewalFrequency, RenewalStatus } from '@/types'
 
@@ -47,6 +47,7 @@ const VALID_CATEGORIES: RenewalCategory[] = [
   'certification', 'membership', 'business_permit', 'tax', 'other',
 ]
 const VALID_FREQUENCIES: RenewalFrequency[] = ['one_time', 'monthly', 'quarterly', 'bi_annual', 'annual']
+const VALID_CURRENCY_CODES = SUPPORTED_CURRENCIES.map(c => c.code)
 
 function parseReminderDays(formData: FormData): number[] {
   return formData.getAll('reminder_days').map(Number).filter(n => Number.isFinite(n) && n > 0)
@@ -58,6 +59,7 @@ function validateRenewalInput(formData: FormData) {
   const frequency = String(formData.get('frequency') ?? '')
   const renewal_date = String(formData.get('renewal_date') ?? '')
   const amountRaw = String(formData.get('amount') ?? '').trim()
+  const currencyRaw = String(formData.get('currency') ?? '').trim()
   const notes = String(formData.get('notes') ?? '').trim()
   const reminder_days = parseReminderDays(formData)
 
@@ -75,10 +77,13 @@ function validateRenewalInput(formData: FormData) {
   if (!renewal_date) fieldErrors.renewal_date = ['Renewal date is required.']
 
   let amount: number | null = null
+  let currency: string | null = null
   if (amountRaw) {
     amount = Number(amountRaw)
     if (Number.isNaN(amount) || amount < 0) {
       fieldErrors.amount = ['Amount must be a positive number.']
+    } else {
+      currency = VALID_CURRENCY_CODES.includes(currencyRaw) ? currencyRaw : DEFAULT_CURRENCY
     }
   }
 
@@ -90,26 +95,11 @@ function validateRenewalInput(formData: FormData) {
       frequency:     frequency as RenewalFrequency,
       renewal_date,
       amount,
+      currency,
       notes:         notes || null,
       reminder_days: reminder_days.length > 0 ? reminder_days : DEFAULT_REMINDER_DAYS,
     },
   }
-}
-
-async function resolveCurrency(amount: number | null): Promise<string | null> {
-  if (amount == null) return null
-
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('currency')
-    .eq('id', user.id)
-    .single()
-
-  return profile?.currency ?? 'USD'
 }
 
 /* ── Create ─────────────────────────────────────────────────────────────── */
@@ -128,8 +118,6 @@ export async function createRenewalAction(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'You must be signed in.' }
 
-  const currency = await resolveCurrency(values.amount)
-
   const { data: inserted, error } = await supabase
     .from('renewals')
     .insert({
@@ -139,7 +127,7 @@ export async function createRenewalAction(
       frequency:     values.frequency,
       renewal_date:  values.renewal_date,
       amount:        values.amount,
-      currency,
+      currency:      values.currency,
       notes:         values.notes,
       reminder_days: values.reminder_days,
     })
@@ -175,7 +163,6 @@ export async function updateRenewalAction(
   }
 
   const supabase = await createClient()
-  const currency = await resolveCurrency(values.amount)
 
   const { error } = await supabase
     .from('renewals')
@@ -185,7 +172,7 @@ export async function updateRenewalAction(
       frequency:     values.frequency,
       renewal_date:  values.renewal_date,
       amount:        values.amount,
-      currency,
+      currency:      values.currency,
       notes:         values.notes,
       reminder_days: values.reminder_days,
     })

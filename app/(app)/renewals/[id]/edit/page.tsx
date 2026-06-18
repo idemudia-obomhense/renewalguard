@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { getRenewalById } from '@/lib/data/renewals'
 import { RenewalForm } from '@/components/renewals/renewal-form'
 import { updateRenewalAction } from '@/lib/actions/renewals'
+import { getProfile } from '@/lib/data/profile'
 
 interface EditRenewalPageProps {
   params: Promise<{ id: string }>
@@ -9,7 +10,7 @@ interface EditRenewalPageProps {
 
 export default async function EditRenewalPage({ params }: EditRenewalPageProps) {
   const { id } = await params
-  const renewal = await getRenewalById(id)
+  const [renewal, profile] = await Promise.all([getRenewalById(id), getProfile()])
 
   if (!renewal) notFound()
 
@@ -20,7 +21,12 @@ export default async function EditRenewalPage({ params }: EditRenewalPageProps) 
         <p className="text-sm text-muted-foreground">Update the details for {renewal.title}.</p>
       </div>
       <div className="rounded-2xl border border-border bg-card p-6">
-        <RenewalForm action={updateRenewalAction} renewal={renewal} submitLabel="Save changes" />
+        <RenewalForm
+          action={updateRenewalAction}
+          renewal={renewal}
+          submitLabel="Save changes"
+          defaultCurrency={profile?.currency}
+        />
       </div>
     </div>
   )

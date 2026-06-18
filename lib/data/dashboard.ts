@@ -25,9 +25,12 @@ async function getActiveRenewals(): Promise<Renewal[]> {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [profile, renewals] = await Promise.all([getProfile(), getActiveRenewals()])
+  const currency = profile?.currency ?? 'USD'
 
+  // Renewals can each carry their own currency — only ones matching the
+  // profile currency can be honestly summed into a single total here.
   const estimatedSpend = renewals.reduce((sum, r) => {
-    if (r.amount == null) return sum
+    if (r.amount == null || r.currency !== currency) return sum
     return sum + r.amount * ANNUALIZED_MULTIPLIER[r.frequency]
   }, 0)
 
@@ -36,7 +39,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     due_this_month:  renewals.filter(r => isDueThisMonth(r.renewal_date)).length,
     overdue:         renewals.filter(r => isOverdue(r.renewal_date)).length,
     estimated_spend: estimatedSpend,
-    currency:        profile?.currency ?? 'USD',
+    currency,
   }
 }
 

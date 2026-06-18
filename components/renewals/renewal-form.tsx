@@ -2,13 +2,21 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { CATEGORY_META, DEFAULT_REMINDER_DAYS, FREQUENCY_LABELS, REMINDER_DAY_OPTIONS } from '@/lib/constants'
+import {
+  CATEGORY_META,
+  DEFAULT_CURRENCY,
+  DEFAULT_REMINDER_DAYS,
+  FREQUENCY_LABELS,
+  REMINDER_DAY_OPTIONS,
+  SUPPORTED_CURRENCIES,
+} from '@/lib/constants'
 import type { ActionResult, Renewal } from '@/types'
 
 interface RenewalFormProps {
   action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>
   renewal?: Renewal
   defaultReminderDays?: number[]
+  defaultCurrency?: string
   submitLabel: string
 }
 
@@ -17,11 +25,12 @@ const initialState: ActionResult = { success: false }
 const inputClass =
   'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring'
 
-export function RenewalForm({ action, renewal, defaultReminderDays, submitLabel }: RenewalFormProps) {
+export function RenewalForm({ action, renewal, defaultReminderDays, defaultCurrency, submitLabel }: RenewalFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState)
   const selectedReminderDays = new Set(
     renewal?.reminder_days ?? defaultReminderDays ?? DEFAULT_REMINDER_DAYS,
   )
+  const selectedCurrency = renewal?.currency ?? defaultCurrency ?? DEFAULT_CURRENCY
 
   return (
     <form action={formAction} className="space-y-5">
@@ -129,15 +138,30 @@ export function RenewalForm({ action, renewal, defaultReminderDays, submitLabel 
           <label htmlFor="amount" className="mb-1.5 block text-sm font-medium text-foreground">
             Amount (optional)
           </label>
-          <input
-            id="amount"
-            name="amount"
-            type="number"
-            min="0"
-            step="0.01"
-            defaultValue={renewal?.amount ?? ''}
-            className={inputClass}
-          />
+          <div className="flex gap-2">
+            <input
+              id="amount"
+              name="amount"
+              type="number"
+              min="0"
+              step="0.01"
+              defaultValue={renewal?.amount ?? ''}
+              className={`flex-1 ${inputClass}`}
+            />
+            <select
+              id="currency"
+              name="currency"
+              defaultValue={selectedCurrency}
+              aria-label="Currency"
+              className={`w-28 shrink-0 ${inputClass}`}
+            >
+              {SUPPORTED_CURRENCIES.map(c => (
+                <option key={c.code} value={c.code}>
+                  {c.code} ({c.symbol})
+                </option>
+              ))}
+            </select>
+          </div>
           {state.fieldErrors?.amount && (
             <p className="mt-1 text-xs text-danger-600">{state.fieldErrors.amount[0]}</p>
           )}

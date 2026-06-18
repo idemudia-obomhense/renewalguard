@@ -16,6 +16,7 @@ export default async function NewRenewalPage() {
           action={createRenewalAction}
           submitLabel="Create renewal"
           defaultReminderDays={profile?.default_reminder_days}
+          defaultCurrency={profile?.currency}
         />
       </div>
     </div>

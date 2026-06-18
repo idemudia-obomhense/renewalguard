@@ -22,7 +22,8 @@ export function formatCurrency(amount: number, currencyCode: string): string {
 
 export function formatAmount(amount: number | null, currencyCode: string | null): string {
   if (amount == null || currencyCode == null) return '—'
-  return formatCurrency(amount, currencyCode)
+  // Symbols alone are ambiguous (USD/CAD/AUD all use "$"), so the code is always shown alongside.
+  return `${formatCurrency(amount, currencyCode)} ${currencyCode}`
 }
 
 /* ── Category / Frequency / Status labels ───────────────────────────────── */
