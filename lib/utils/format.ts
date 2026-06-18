@@ -8,22 +8,20 @@ export function getCurrencySymbol(currencyCode: string): string {
 }
 
 export function formatCurrency(amount: number, currencyCode: string): string {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style:                 'currency',
-      currency:              currencyCode,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  } catch {
-    return `${getCurrencySymbol(currencyCode)}${amount.toFixed(2)}`
-  }
+  // Built from our own SUPPORTED_CURRENCIES symbol table rather than Intl's
+  // `style: 'currency'` — Intl falls back to printing the ISO code itself as
+  // the "symbol" for currencies its locale data doesn't recognize (e.g. NGN),
+  // which previously caused formatAmount to show the code twice ("NGN 100 NGN").
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
+  return `${getCurrencySymbol(currencyCode)}${formattedNumber}`
 }
 
 export function formatAmount(amount: number | null, currencyCode: string | null): string {
   if (amount == null || currencyCode == null) return '—'
-  // Symbols alone are ambiguous (USD/CAD/AUD all use "$"), so the code is always shown alongside.
-  return `${formatCurrency(amount, currencyCode)} ${currencyCode}`
+  return formatCurrency(amount, currencyCode)
 }
 
 /* ── Category / Frequency / Status labels ───────────────────────────────── */
