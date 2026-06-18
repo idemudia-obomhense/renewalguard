@@ -53,7 +53,7 @@ export async function signUpAction(
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -64,6 +64,14 @@ export async function signUpAction(
 
   if (error) {
     return { success: false, error: error.message }
+  }
+
+  // Email confirmation is disabled in Supabase, so signUp already returns a
+  // live session — go straight to the dashboard instead of asking the user
+  // to check their inbox. Falls back to the inbox message if confirmation
+  // ever gets turned back on (signUp then returns no session).
+  if (data.session) {
+    redirect('/dashboard')
   }
 
   return { success: true }
