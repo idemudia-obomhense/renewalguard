@@ -139,28 +139,32 @@ export function RenewalForm({ action, renewal, defaultReminderDays, defaultCurre
             Amount (optional)
           </label>
           <div className="flex gap-2">
-            <input
-              id="amount"
-              name="amount"
-              type="number"
-              min="0"
-              step="0.01"
-              defaultValue={renewal?.amount ?? ''}
-              className={`flex-1 ${inputClass}`}
-            />
-            <select
-              id="currency"
-              name="currency"
-              defaultValue={selectedCurrency}
-              aria-label="Currency"
-              className={`w-28 shrink-0 ${inputClass}`}
-            >
-              {SUPPORTED_CURRENCIES.map(c => (
-                <option key={c.code} value={c.code}>
-                  {c.code} ({c.symbol})
-                </option>
-              ))}
-            </select>
+            <div className="w-[60%]">
+              <input
+                id="amount"
+                name="amount"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={renewal?.amount ?? ''}
+                className={inputClass}
+              />
+            </div>
+            <div className="w-[40%]">
+              <select
+                id="currency"
+                name="currency"
+                defaultValue={selectedCurrency}
+                aria-label="Currency"
+                className={inputClass}
+              >
+                {SUPPORTED_CURRENCIES.map(c => (
+                  <option key={c.code} value={c.code}>
+                    {c.code}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           {state.fieldErrors?.amount && (
             <p className="mt-1 text-xs text-danger-600">{state.fieldErrors.amount[0]}</p>
