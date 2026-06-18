@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { DEFAULT_CURRENCY, DEFAULT_REMINDER_DAYS, SUPPORTED_CURRENCIES } from '@/lib/constants'
 import { syncPendingReminders, cancelPendingReminders } from '@/lib/reminders'
-import type { ActionResult, RenewalCategory, RenewalFrequency, RenewalStatus } from '@/types'
+import type { ActionResult, RenewalCategory, RenewalFrequency, RenewalIntent, RenewalStatus } from '@/types'
 
 const VALID_CATEGORIES: RenewalCategory[] = [
   'subscription', 'domain', 'insurance', 'passport', 'visa',
@@ -27,6 +27,7 @@ function validateRenewalInput(formData: FormData) {
   const currencyRaw = String(formData.get('currency') ?? '').trim()
   const notes = String(formData.get('notes') ?? '').trim()
   const reminder_days = parseReminderDays(formData)
+  const intentRaw = String(formData.get('intent') ?? '').trim()
 
   const fieldErrors: Partial<Record<string, string[]>> = {}
 
@@ -52,6 +53,10 @@ function validateRenewalInput(formData: FormData) {
     }
   }
 
+  // intent is only meaningful for one-time renewals — ignored (nulled) for everything else.
+  const intent: RenewalIntent | null =
+    frequency === 'one_time' && (intentRaw === 'renew' || intentRaw === 'cancel') ? intentRaw : null
+
   return {
     fieldErrors,
     values: {
@@ -63,6 +68,7 @@ function validateRenewalInput(formData: FormData) {
       currency,
       notes:         notes || null,
       reminder_days: reminder_days.length > 0 ? reminder_days : DEFAULT_REMINDER_DAYS,
+      intent,
     },
   }
 }
@@ -95,6 +101,7 @@ export async function createRenewalAction(
       currency:      values.currency,
       notes:         values.notes,
       reminder_days: values.reminder_days,
+      intent:        values.intent,
     })
     .select('id')
     .single()
@@ -129,6 +136,13 @@ export async function updateRenewalAction(
 
   const supabase = await createClient()
 
+  const { data: existing } = await supabase
+    .from('renewals')
+    .select('renewal_date')
+    .eq('id', id)
+    .single()
+  const dateChanged = existing != null && existing.renewal_date !== values.renewal_date
+
   const { error } = await supabase
     .from('renewals')
     .update({
@@ -140,6 +154,10 @@ export async function updateRenewalAction(
       currency:      values.currency,
       notes:         values.notes,
       reminder_days: values.reminder_days,
+      intent:        values.intent,
+      // A date change starts a fresh overdue cycle — an unrelated edit
+      // (e.g. notes) shouldn't reset an escalation already in progress.
+      ...(dateChanged ? { overdue_emails_sent: 0, last_overdue_email_sent_at: null } : {}),
     })
     .eq('id', id)
 
@@ -179,7 +197,10 @@ export async function restoreRenewalAction(formData: FormData): Promise<void> {
   if (!id) return
 
   const supabase = await createClient()
-  await supabase.from('renewals').update({ status: 'active' }).eq('id', id)
+  await supabase
+    .from('renewals')
+    .update({ status: 'active', overdue_emails_sent: 0, last_overdue_email_sent_at: null })
+    .eq('id', id)
 
   const { data: renewal } = await supabase
     .from('renewals')

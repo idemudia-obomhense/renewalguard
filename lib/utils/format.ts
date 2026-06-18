@@ -97,6 +97,10 @@ export function pluralize(count: number, singular: string, plural = `${singular}
   return count === 1 ? singular : plural
 }
 
+export function getFirstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] || 'there'
+}
+
 export function initials(name: string): string {
   return name
     .split(' ')

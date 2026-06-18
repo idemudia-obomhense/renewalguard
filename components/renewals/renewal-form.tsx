@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState, useActionState } from 'react'
 import Link from 'next/link'
 import {
   CATEGORY_META,
@@ -8,9 +8,10 @@ import {
   DEFAULT_REMINDER_DAYS,
   FREQUENCY_LABELS,
   REMINDER_DAY_OPTIONS,
+  RENEWAL_INTENT_OPTIONS,
   SUPPORTED_CURRENCIES,
 } from '@/lib/constants'
-import type { ActionResult, Renewal } from '@/types'
+import type { ActionResult, Renewal, RenewalFrequency } from '@/types'
 
 interface RenewalFormProps {
   action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>
@@ -27,10 +28,12 @@ const inputClass =
 
 export function RenewalForm({ action, renewal, defaultReminderDays, defaultCurrency, submitLabel }: RenewalFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState)
+  const [frequency, setFrequency] = useState<RenewalFrequency | ''>(renewal?.frequency ?? '')
   const selectedReminderDays = new Set(
     renewal?.reminder_days ?? defaultReminderDays ?? DEFAULT_REMINDER_DAYS,
   )
   const selectedCurrency = renewal?.currency ?? defaultCurrency ?? DEFAULT_CURRENCY
+  const selectedIntent = renewal?.intent ?? 'renew'
 
   return (
     <form action={formAction} className="space-y-5">
@@ -97,7 +100,8 @@ export function RenewalForm({ action, renewal, defaultReminderDays, defaultCurre
           <select
             id="frequency"
             name="frequency"
-            defaultValue={renewal?.frequency ?? ''}
+            value={frequency}
+            onChange={e => setFrequency(e.target.value as RenewalFrequency)}
             required
             className={inputClass}
           >
@@ -115,6 +119,31 @@ export function RenewalForm({ action, renewal, defaultReminderDays, defaultCurre
           )}
         </div>
       </div>
+
+      {frequency === 'one_time' && (
+        <div>
+          <p className="mb-1.5 block text-sm font-medium text-foreground">
+            What do you want to do when this is due?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {RENEWAL_INTENT_OPTIONS.map(opt => (
+              <label
+                key={opt.value}
+                className="flex cursor-pointer items-center gap-2 rounded-full border border-input px-3 py-1.5 text-sm text-foreground has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary"
+              >
+                <input
+                  type="radio"
+                  name="intent"
+                  value={opt.value}
+                  defaultChecked={selectedIntent === opt.value}
+                  className="h-3.5 w-3.5 accent-primary"
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>

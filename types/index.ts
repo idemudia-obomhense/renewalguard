@@ -25,6 +25,8 @@ export type RenewalFrequency =
 
 export type RenewalStatus = 'active' | 'archived' | 'completed'
 
+export type RenewalIntent = 'renew' | 'cancel'
+
 export type ReminderStatus = 'pending' | 'sent' | 'failed' | 'cancelled'
 
 export type NotificationType = 'reminder_sent' | 'renewal_due' | 'renewal_overdue'
@@ -73,6 +75,9 @@ export interface Renewal {
   notes: string | null
   status: RenewalStatus
   reminder_days: number[]
+  intent: RenewalIntent | null
+  overdue_emails_sent: number
+  last_overdue_email_sent_at: string | null
   deleted_at: string | null
   created_at: string
   updated_at: string

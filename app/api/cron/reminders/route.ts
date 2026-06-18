@@ -3,11 +3,17 @@ import { Resend } from 'resend'
 import { format, parseISO } from 'date-fns'
 import { createServiceClient } from '@/lib/supabase/server'
 import { toISODateString, today } from '@/lib/utils/date'
-import { formatAmount, formatCategoryLabel } from '@/lib/utils/format'
-import { rollOverdueRenewals } from '@/lib/reminders'
+import { formatAmount, formatCategoryLabel, formatFrequencyLabel, getFirstName } from '@/lib/utils/format'
+import { rollOverdueRenewals, findAndMarkOverdueEscalations, type RolledRenewal, type OverdueEscalationCandidate } from '@/lib/reminders'
+import { selectUpcomingTemplate } from '@/lib/email/select-template'
+import { template3AutoRolled, template2cOneTimeOverdue, template5RecurringOverdueFailsafe, type EmailTemplateProps, type RenderedEmail } from '@/lib/email/templates'
 import type { Renewal } from '@/types'
 
 const FROM_EMAIL = process.env.REMINDER_FROM_EMAIL ?? 'RenewalGuard <onboarding@resend.dev>'
+
+function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+}
 
 interface DueReminder {
   id: string
@@ -16,20 +22,36 @@ interface DueReminder {
   renewals: Renewal | null
 }
 
-function dueLabel(daysBefore: number): string {
-  if (daysBefore === 1) return 'tomorrow'
-  return `in ${daysBefore} days`
+interface RecipientContext {
+  email: string
+  name: string
 }
 
-function reminderEmailHtml(renewal: Renewal, daysBefore: number): string {
-  const renewalDate = format(parseISO(renewal.renewal_date), 'MMMM d, yyyy')
-  return `
-    <p>Hi,</p>
-    <p><strong>${renewal.title}</strong> (${formatCategoryLabel(renewal.category)}) renews on
-    <strong>${renewalDate}</strong> — that's ${dueLabel(daysBefore)}.</p>
-    ${renewal.amount != null ? `<p>Amount: ${formatAmount(renewal.amount, renewal.currency)}</p>` : ''}
-    <p>— RenewalGuard</p>
-  `
+async function getRecipientContext(
+  supabase: Awaited<ReturnType<typeof createServiceClient>>,
+  userId: string,
+): Promise<RecipientContext | null> {
+  const [{ data: userData }, { data: profile }] = await Promise.all([
+    supabase.auth.admin.getUserById(userId),
+    supabase.from('profiles').select('full_name').eq('id', userId).single(),
+  ])
+  const email = userData?.user?.email
+  if (!email) return null
+  return { email, name: getFirstName(profile?.full_name ?? '') }
+}
+
+async function sendTemplateEmail(
+  resend: Resend,
+  recipient: RecipientContext,
+  rendered: RenderedEmail,
+): Promise<void> {
+  const { error } = await resend.emails.send({
+    from:    FROM_EMAIL,
+    to:      recipient.email,
+    subject: rendered.subject,
+    html:    rendered.html,
+  })
+  if (error) throw new Error(error.message)
 }
 
 export async function GET(request: NextRequest) {
@@ -44,6 +66,8 @@ export async function GET(request: NextRequest) {
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const supabase = await createServiceClient()
+
+  /* ── Pass 1: upcoming reminders (Templates 1, 2A, 2B, 4) ────────────── */
 
   const { data: dueReminders, error } = await supabase
     .from('reminders')
@@ -70,17 +94,21 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(renewal.user_id)
-      const email = userData?.user?.email
-      if (userError || !email) throw new Error('Could not resolve recipient email.')
+      const recipient = await getRecipientContext(supabase, renewal.user_id)
+      if (!recipient) throw new Error('Could not resolve recipient email.')
 
-      const { error: sendError } = await resend.emails.send({
-        from:    FROM_EMAIL,
-        to:      email,
-        subject: `Reminder: ${renewal.title} renews ${dueLabel(reminder.days_before)}`,
-        html:    reminderEmailHtml(renewal, reminder.days_before),
-      })
-      if (sendError) throw new Error(sendError.message)
+      const props: EmailTemplateProps = {
+        name:         recipient.name,
+        renewalTitle: renewal.title,
+        category:     formatCategoryLabel(renewal.category),
+        frequency:    formatFrequencyLabel(renewal.frequency),
+        dueDate:      format(parseISO(renewal.renewal_date), 'MMMM d, yyyy'),
+        amount:       formatAmount(renewal.amount, renewal.currency),
+        ctaUrl:       `${getSiteUrl()}/renewals/${renewal.id}`,
+        daysLeft:     reminder.days_before,
+      }
+      const rendered = selectUpcomingTemplate(renewal.frequency, renewal.intent, reminder.days_before, props)
+      await sendTemplateEmail(resend, recipient, rendered)
 
       await supabase
         .from('reminders')
@@ -92,7 +120,7 @@ export async function GET(request: NextRequest) {
         renewal_id: renewal.id,
         type:       'reminder_sent',
         title:      'Renewal reminder sent',
-        message:    `${renewal.title} renews ${dueLabel(reminder.days_before)}.`,
+        message:    `${renewal.title} renews ${reminder.days_before === 1 ? 'tomorrow' : `in ${reminder.days_before} days`}.`,
       })
 
       sent++
@@ -108,7 +136,67 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const rolled = await rollOverdueRenewals(supabase)
+  /* ── Pass 2: roll overdue recurring renewals forward (Template 3) ───── */
 
-  return NextResponse.json({ processed: (dueReminders ?? []).length, sent, failed, rolled: rolled.length })
+  const rolled = await rollOverdueRenewals(supabase)
+  let autoRollEmailsSent = 0
+
+  for (const renewal of rolled as RolledRenewal[]) {
+    try {
+      const recipient = await getRecipientContext(supabase, renewal.user_id)
+      if (!recipient) continue
+
+      const props: EmailTemplateProps = {
+        name:         recipient.name,
+        renewalTitle: renewal.title,
+        category:     '',
+        frequency:    formatFrequencyLabel(renewal.frequency),
+        dueDate:      format(parseISO(renewal.newDate), 'MMMM d, yyyy'),
+        amount:       formatAmount(renewal.amount, renewal.currency),
+        ctaUrl:       `${getSiteUrl()}/renewals/${renewal.id}`,
+        oldDate:      format(parseISO(renewal.oldDate), 'MMMM d, yyyy'),
+      }
+      await sendTemplateEmail(resend, recipient, template3AutoRolled(props))
+      autoRollEmailsSent++
+    } catch (err) {
+      console.error(`[cron] Failed to send auto-roll email for renewal ${renewal.id}:`, err)
+    }
+  }
+
+  /* ── Pass 3: overdue escalation (Templates 2C, 5) ────────────────────── */
+
+  const overdueCandidates = await findAndMarkOverdueEscalations(supabase)
+  let overdueEmailsSent = 0
+
+  for (const candidate of overdueCandidates as OverdueEscalationCandidate[]) {
+    try {
+      const recipient = await getRecipientContext(supabase, candidate.user_id)
+      if (!recipient) continue
+
+      const props: EmailTemplateProps = {
+        name:         recipient.name,
+        renewalTitle: candidate.title,
+        category:     formatCategoryLabel(candidate.category),
+        frequency:    formatFrequencyLabel(candidate.frequency),
+        dueDate:      format(parseISO(candidate.renewal_date), 'MMMM d, yyyy'),
+        amount:       formatAmount(candidate.amount, candidate.currency),
+        ctaUrl:       `${getSiteUrl()}/renewals/${candidate.id}`,
+        daysOverdue:  candidate.daysOverdue,
+      }
+      const rendered = candidate.template === '2c' ? template2cOneTimeOverdue(props) : template5RecurringOverdueFailsafe(props)
+      await sendTemplateEmail(resend, recipient, rendered)
+      overdueEmailsSent++
+    } catch (err) {
+      console.error(`[cron] Failed to send overdue escalation email for renewal ${candidate.id}:`, err)
+    }
+  }
+
+  return NextResponse.json({
+    processed: (dueReminders ?? []).length,
+    sent,
+    failed,
+    rolled: rolled.length,
+    autoRollEmailsSent,
+    overdueEmailsSent,
+  })
 }

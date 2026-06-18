@@ -1,6 +1,7 @@
 import type {
   RenewalCategory,
   RenewalFrequency,
+  RenewalIntent,
   RenewalStatus,
   DateFormat,
   CategoryMeta,
@@ -15,6 +16,12 @@ export const EXPIRING_SOON_DAYS = 30
 export const REMINDER_DAY_OPTIONS: number[] = [0, 1, 3, 7, 14, 30, 60, 90]
 
 export const DEFAULT_REMINDER_DAYS: number[] = [7, 30]
+
+/* ── One-time renewal intent (only relevant when frequency = 'one_time') ── */
+export const RENEWAL_INTENT_OPTIONS: { value: RenewalIntent; label: string }[] = [
+  { value: 'renew',  label: '🔄 Remind me to renew' },
+  { value: 'cancel', label: '❌ Remind me to cancel / deactivate' },
+]
 
 /* ── Locale / display defaults ──────────────────────────────────────────── */
 export const DEFAULT_CURRENCY = 'USD'
