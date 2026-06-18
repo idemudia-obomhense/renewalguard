@@ -4,6 +4,7 @@ import { format, parseISO } from 'date-fns'
 import { createServiceClient } from '@/lib/supabase/server'
 import { toISODateString, today } from '@/lib/utils/date'
 import { formatAmount, formatCategoryLabel } from '@/lib/utils/format'
+import { rollOverdueRenewals } from '@/lib/reminders'
 import type { Renewal } from '@/types'
 
 const FROM_EMAIL = process.env.REMINDER_FROM_EMAIL ?? 'RenewalGuard <onboarding@resend.dev>'
@@ -107,5 +108,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ processed: (dueReminders ?? []).length, sent, failed })
+  const rolled = await rollOverdueRenewals(supabase)
+
+  return NextResponse.json({ processed: (dueReminders ?? []).length, sent, failed, rolled: rolled.length })
 }

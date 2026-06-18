@@ -4,43 +4,8 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { DEFAULT_CURRENCY, DEFAULT_REMINDER_DAYS, SUPPORTED_CURRENCIES } from '@/lib/constants'
-import { getReminderDate } from '@/lib/utils/date'
+import { syncPendingReminders, cancelPendingReminders } from '@/lib/reminders'
 import type { ActionResult, RenewalCategory, RenewalFrequency, RenewalStatus } from '@/types'
-
-type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>
-
-/**
- * Reminders are rows in their own table (picked up by the email cron job),
- * not derived from renewals.reminder_days at send time. Re-sync them
- * whenever a renewal's date/reminder_days change, or whenever it stops
- * being active, so the cron never emails about a stale or inactive renewal.
- */
-async function syncPendingReminders(
-  supabase: SupabaseServerClient,
-  renewalId: string,
-  renewalDate: string,
-  reminderDays: number[],
-): Promise<void> {
-  await supabase.from('reminders').delete().eq('renewal_id', renewalId).eq('status', 'pending')
-
-  if (reminderDays.length === 0) return
-
-  const rows = reminderDays.map(days => ({
-    renewal_id:     renewalId,
-    days_before:    days,
-    scheduled_date: getReminderDate(renewalDate, days),
-  }))
-
-  await supabase.from('reminders').insert(rows)
-}
-
-async function cancelPendingReminders(supabase: SupabaseServerClient, renewalId: string): Promise<void> {
-  await supabase
-    .from('reminders')
-    .update({ status: 'cancelled' })
-    .eq('renewal_id', renewalId)
-    .eq('status', 'pending')
-}
 
 const VALID_CATEGORIES: RenewalCategory[] = [
   'subscription', 'domain', 'insurance', 'passport', 'visa',
