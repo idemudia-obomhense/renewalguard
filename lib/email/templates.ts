@@ -21,7 +21,7 @@ export interface RenderedEmail {
 /* ── Template 1 — Recurring, Upcoming ───────────────────────────────────── */
 export function template1Recurring(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `🔄 Heads up ${p.name} — your ${p.renewalTitle} renews in ${p.daysLeft} days`,
+    subject: `${p.name}, your ${p.renewalTitle} renews in ${p.daysLeft} days`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `Just a heads-up from your renewal desk.<br><br>Your <strong>${p.renewalTitle}</strong> (${p.category}) is set to renew automatically in ${p.daysLeft} days. No panic — just making sure you're aware and your payment method is ready.`,
@@ -41,7 +41,7 @@ export function template1Recurring(p: EmailTemplateProps): RenderedEmail {
 /* ── Template 2A — One-Time, Intent: Renew, Upcoming ────────────────────── */
 export function template2aOneTimeRenew(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `⏳ ${p.name}, time to renew your ${p.renewalTitle} — due in ${p.daysLeft} days`,
+    subject: `${p.name}, your ${p.renewalTitle} is due for renewal in ${p.daysLeft} days`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `Your <strong>${p.renewalTitle}</strong> (${p.category}) is coming up for renewal in ${p.daysLeft} days.<br><br>This won't renew automatically — you'll need to take action to keep it active.`,
@@ -61,7 +61,7 @@ export function template2aOneTimeRenew(p: EmailTemplateProps): RenderedEmail {
 /* ── Template 2B — One-Time, Intent: Cancel, Upcoming ───────────────────── */
 export function template2bOneTimeCancel(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `🔔 ${p.name}, your ${p.renewalTitle} renews in ${p.daysLeft} days — have you cancelled yet?`,
+    subject: `${p.name}, your ${p.renewalTitle} renews in ${p.daysLeft} days — cancel before then?`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `You marked <strong>${p.renewalTitle}</strong> (${p.category}) as something you want to cancel before it charges you again.<br><br>You have ${p.daysLeft} days to act — cancel now to avoid being charged on ${p.dueDate}.`,
@@ -81,7 +81,7 @@ export function template2bOneTimeCancel(p: EmailTemplateProps): RenderedEmail {
 /* ── Template 3 — Recurring, Auto-Rolled ────────────────────────────────── */
 export function template3AutoRolled(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `✅ ${p.name}, your ${p.renewalTitle} just rolled over — next due ${p.dueDate}`,
+    subject: `${p.name}, your ${p.renewalTitle} renewal date has been updated`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `Just keeping you in the loop.<br><br>Your <strong>${p.renewalTitle}</strong> (${p.frequency}) passed its renewal date — we've automatically moved it forward to your next cycle so your dashboard stays clean and accurate.`,
@@ -102,7 +102,7 @@ export function template3AutoRolled(p: EmailTemplateProps): RenderedEmail {
 /* ── Template 4 — Final Reminder, 1 Day Left (overrides all others) ────── */
 export function template4FinalReminder(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `🚨 ${p.name}, ${p.renewalTitle} is due TOMORROW — act now`,
+    subject: `${p.name}, ${p.renewalTitle} is due tomorrow`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `This is your final reminder.<br><br><strong>${p.renewalTitle}</strong> (${p.category}) is due tomorrow, ${p.dueDate}. After this, we won't be able to help you avoid the consequences of missing it.`,
@@ -122,7 +122,7 @@ export function template4FinalReminder(p: EmailTemplateProps): RenderedEmail {
 /* ── Template 2C — One-Time, Overdue (day 5 / 10 / 15) ──────────────────── */
 export function template2cOneTimeOverdue(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `⚠️ ${p.name}, your ${p.renewalTitle} is ${p.daysOverdue} days overdue — what happened?`,
+    subject: `${p.name}, your ${p.renewalTitle} is ${p.daysOverdue} days overdue`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `Your <strong>${p.renewalTitle}</strong> (${p.category}) was due on ${p.dueDate} — that's ${p.daysOverdue} days ago and it's still unresolved in your dashboard.<br><br>We don't know if you renewed, cancelled, or it slipped through the cracks. Help us keep your records accurate.`,
@@ -145,7 +145,7 @@ export function template2cOneTimeOverdue(p: EmailTemplateProps): RenderedEmail {
 /* ── Template 5 — Recurring, Overdue failsafe (auto-roll may have failed) ─ */
 export function template5RecurringOverdueFailsafe(p: EmailTemplateProps): RenderedEmail {
   return {
-    subject: `🔄 ${p.name}, something may be off with your ${p.renewalTitle} — please check`,
+    subject: `${p.name}, please check your ${p.renewalTitle} renewal`,
     html: renderEmailShell({
       greeting: `Hi ${p.name},`,
       intro: `Your <strong>${p.renewalTitle}</strong> (${p.frequency}) was due on ${p.dueDate} and we noticed it hasn't updated in your dashboard yet.<br><br>This could mean your renewal didn't process, or something needs your attention.`,
