@@ -20,22 +20,17 @@ interface ConfirmPageProps {
  */
 export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
   const resolvedParams = await searchParams
-  console.log('[DEBUG /auth/confirm] raw searchParams:', JSON.stringify(resolvedParams))
-
   const { code, token_hash: tokenHash, type, next = '/dashboard' } = resolvedParams
 
   if (code) {
-    console.log('[DEBUG /auth/confirm] code present — dispatching to /auth/confirm/exchange')
     const params = new URLSearchParams({ code, next })
     redirect(`/auth/confirm/exchange?${params.toString()}`)
   }
 
   if (tokenHash && type) {
-    console.log('[DEBUG /auth/confirm] token_hash present — dispatching to /auth/confirm/verify')
     const params = new URLSearchParams({ token_hash: tokenHash, type, next })
     redirect(`/auth/confirm/verify?${params.toString()}`)
   }
 
-  console.log('[DEBUG /auth/confirm] no code or token_hash — rendering client-side fragment handler')
   return <ConfirmFragmentHandler next={next} />
 }

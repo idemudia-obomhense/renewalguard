@@ -21,23 +21,17 @@ export function ConfirmFragmentHandler({ next }: ConfirmFragmentHandlerProps) {
   const router = useRouter()
 
   useEffect(() => {
-    console.log('[DEBUG confirm-fragment-handler] full URL:', window.location.href)
-    console.log('[DEBUG confirm-fragment-handler] raw hash:', window.location.hash)
-
     const hashParams = new URLSearchParams(window.location.hash.slice(1))
     const accessToken = hashParams.get('access_token')
     const refreshToken = hashParams.get('refresh_token')
-    console.log('[DEBUG confirm-fragment-handler] access_token present:', !!accessToken, '| refresh_token present:', !!refreshToken)
 
     if (!accessToken || !refreshToken) {
-      console.log('[DEBUG confirm-fragment-handler] missing tokens — redirecting to /login')
       router.replace('/login?error=invalid_or_expired_link')
       return
     }
 
     const supabase = createClient()
     supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
-      console.log('[DEBUG confirm-fragment-handler] setSession result:', error ? `ERROR: ${error.message}` : 'success')
       router.replace(error ? '/login?error=invalid_or_expired_link' : next)
     })
   }, [next, router])

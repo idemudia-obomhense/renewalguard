@@ -12,9 +12,6 @@ import { createClient } from '@/lib/supabase/server'
  * Actions are allowed to do.
  */
 export async function GET(request: NextRequest) {
-  console.log('[DEBUG /auth/confirm/verify] full incoming URL:', request.nextUrl.toString())
-  console.log('[DEBUG /auth/confirm/verify] referer header:', request.headers.get('referer'))
-
   const { searchParams } = request.nextUrl
   const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null
@@ -23,13 +20,10 @@ export async function GET(request: NextRequest) {
   if (tokenHash && type) {
     const supabase = await createClient()
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
-    console.log('[DEBUG /auth/confirm/verify] verifyOtp result:', error ? `ERROR: ${error.message}` : 'success')
 
     if (!error) {
       redirect(next)
     }
-  } else {
-    console.log('[DEBUG /auth/confirm/verify] missing token_hash or type — should not normally happen, page.tsx only redirects here when both are present')
   }
 
   redirect('/login?error=invalid_or_expired_link')
