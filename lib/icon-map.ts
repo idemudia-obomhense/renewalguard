@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   CalendarClock,
   Settings,
+  BarChart3,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -34,6 +35,7 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
   CalendarClock,
   Settings,
+  BarChart3,
 }
 
 export function getIcon(name: string): LucideIcon {

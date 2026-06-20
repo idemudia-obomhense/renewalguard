@@ -163,6 +163,22 @@ export const CATEGORY_META: Record<RenewalCategory, CategoryMeta> = {
   },
 }
 
+/* ── Category colors as hex (for charts — same shade each category already
+   uses via CATEGORY_META's `color` class, just resolved to a value usable
+   in inline styles like a conic-gradient) ─────────────────────────────── */
+export const CATEGORY_COLOR_HEX: Record<RenewalCategory, string> = {
+  subscription:    '#2563eb', // blue-600
+  domain:          '#7c3aed', // violet-600
+  insurance:       '#059669', // emerald-600
+  passport:        '#4f46e5', // indigo-600
+  visa:            '#0891b2', // cyan-600
+  certification:   '#d97706', // amber-600
+  membership:      '#db2777', // pink-600
+  business_permit: '#ea580c', // orange-600
+  tax:             '#dc2626', // red-600
+  other:           '#57534e', // stone-600
+}
+
 /* ── Frequency labels ───────────────────────────────────────────────────── */
 export const FREQUENCY_LABELS: Record<RenewalFrequency, string> = {
   one_time:   'One-time',
@@ -204,5 +220,6 @@ export const APP_DESCRIPTION = 'Never miss a renewal deadline again.'
 export const NAV_ITEMS = [
   { label: 'Dashboard',  href: '/dashboard',  icon: 'LayoutDashboard' },
   { label: 'Renewals',   href: '/renewals',   icon: 'CalendarClock'   },
+  { label: 'Analytics',  href: '/analytics',  icon: 'BarChart3'       },
   { label: 'Settings',   href: '/settings',   icon: 'Settings'        },
 ] as const

@@ -3,7 +3,7 @@ import { getProfile } from '@/lib/data/profile'
 import { computeUrgency, getDaysRemaining, isDueThisMonth, isOverdue } from '@/lib/utils/date'
 import type { DashboardStats, Renewal, RenewalFrequency, RenewalWithUrgency } from '@/types'
 
-const ANNUALIZED_MULTIPLIER: Record<RenewalFrequency, number> = {
+export const ANNUALIZED_MULTIPLIER: Record<RenewalFrequency, number> = {
   one_time:  0,
   monthly:   12,
   quarterly: 4,

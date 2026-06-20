@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Activity, CalendarClock, AlertTriangle, Wallet } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format'
 import type { DashboardStats } from '@/types'
@@ -51,7 +52,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
         </div>
       ))}
 
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <Link
+        href="/analytics"
+        className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition-colors hover:bg-accent"
+      >
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">Est. Annual Spend</p>
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
@@ -61,7 +65,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
         <p className="text-2xl font-semibold text-foreground">
           {formatCurrency(stats.estimated_spend, stats.currency)}
         </p>
-      </div>
+        <span className="mt-auto self-end rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+          View Analytics →
+        </span>
+      </Link>
     </div>
   )
 }
