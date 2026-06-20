@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 /* ── Route groups ───────────────────────────────────────────────────────── */
 
-const PUBLIC_PATHS = ['/', '/login', '/signup', '/forgot-password', '/auth/callback', '/auth/confirm']
+const PUBLIC_PATHS = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/auth/callback', '/auth/confirm']
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(`${p}/`))
