@@ -40,7 +40,7 @@ export function RenewalFilters({ filter, sort, search }: RenewalFiltersProps) {
             key={key}
             type="button"
             onClick={() => updateParam('filter', key === 'all' ? '' : key)}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-full px-2.5 py-1 text-sm font-medium transition-colors sm:px-3 sm:py-1.5 ${
               filter === key
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground hover:bg-accent'

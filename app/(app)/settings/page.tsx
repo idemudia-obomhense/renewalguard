@@ -20,9 +20,9 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   if (!profile) notFound()
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Settings</h2>
+        <h2 className="text-base font-semibold text-foreground sm:text-lg">Settings</h2>
         <p className="text-sm text-muted-foreground">Manage your account and preferences.</p>
       </div>
 
@@ -31,7 +31,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           <Link
             key={t.key}
             href={`/settings?tab=${t.key}`}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
               tab === t.key
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -42,7 +42,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         ))}
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         {tab === 'preferences' ? <PreferencesForm profile={profile} /> : <ProfileForm profile={profile} />}
       </div>
     </div>

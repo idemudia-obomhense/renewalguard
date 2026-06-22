@@ -11,7 +11,7 @@ export default async function AnalyticsPage() {
   const analytics = await getSpendAnalytics()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
         <Link
           href="/dashboard"
@@ -20,7 +20,7 @@ export default async function AnalyticsPage() {
           <ArrowLeft className="h-3.5 w-3.5" />
           Dashboard
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">Spend Analytics</h1>
+        <h1 className="text-xl font-bold text-foreground sm:text-2xl">Spend Analytics</h1>
       </div>
       <div className="border-t border-border" />
 
@@ -28,7 +28,7 @@ export default async function AnalyticsPage() {
 
       <WalletRow analytics={analytics} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <CategoryDonut byCategory={analytics.byCategory} heroCurrency={analytics.heroCurrency} />
         <MonthBarChart byMonth={analytics.byMonth} heroCurrency={analytics.heroCurrency} />
       </div>

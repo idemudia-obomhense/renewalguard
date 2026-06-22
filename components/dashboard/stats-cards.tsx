@@ -41,31 +41,31 @@ export function StatsCards({ stats }: StatsCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {CARD_CONFIG.map(({ key, label, icon: Icon, color, bg, darkColor, darkBg }) => (
-        <div key={key} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div key={key} className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">{label}</p>
-            <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${bg} ${color} ${darkBg} ${darkColor}`}>
+            <span className={`flex h-8 w-8 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${bg} ${color} ${darkBg} ${darkColor}`}>
               <Icon className="h-[18px] w-[18px]" />
             </span>
           </div>
-          <p className="text-2xl font-semibold text-foreground">{stats[key]}</p>
+          <p className="text-xl font-semibold text-foreground sm:text-2xl">{stats[key]}</p>
         </div>
       ))}
 
       <Link
         href="/analytics"
-        className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-sm transition-colors hover:bg-accent"
+        className="flex flex-col rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent sm:p-5"
       >
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">Est. Annual Spend</p>
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 sm:h-9 sm:w-9 dark:bg-emerald-950/40 dark:text-emerald-400">
             <Wallet className="h-[18px] w-[18px]" />
           </span>
         </div>
-        <p className="text-2xl font-semibold text-foreground">
+        <p className="text-xl font-semibold text-foreground sm:text-2xl">
           {formatCurrency(stats.estimated_spend, stats.currency)}
         </p>
-        <span className="mt-auto self-end rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+        <span className="mt-auto self-end rounded-full bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary sm:px-2.5 sm:text-xs">
           View Analytics →
         </span>
       </Link>

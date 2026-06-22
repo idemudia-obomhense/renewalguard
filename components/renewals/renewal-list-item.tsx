@@ -18,11 +18,11 @@ export function RenewalListItem({ renewal }: RenewalListItemProps) {
   return (
     <Link
       href={`/renewals/${renewal.id}`}
-      className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-accent sm:p-5"
+      className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-accent sm:gap-4 sm:p-5"
     >
       <div className="flex min-w-0 items-center gap-3">
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${category.bgColor} ${category.color} ${category.darkBgColor} ${category.darkColor}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${category.bgColor} ${category.color} ${category.darkBgColor} ${category.darkColor}`}
         >
           {/* getIcon resolves an existing lucide-react component from a static lookup table, not a new definition. */}
           {/* eslint-disable-next-line react-hooks/static-components */}

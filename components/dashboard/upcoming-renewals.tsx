@@ -10,8 +10,8 @@ interface UpcomingRenewalsProps {
 export function UpcomingRenewals({ renewals }: UpcomingRenewalsProps) {
   if (renewals.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-        <CalendarClock className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+      <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center sm:p-10">
+        <CalendarClock className="mx-auto mb-3 h-6 w-6 text-muted-foreground sm:h-8 sm:w-8" />
         <p className="mb-1 text-sm font-medium text-foreground">No upcoming renewals</p>
         <p className="mb-4 text-sm text-muted-foreground">
           Add your first renewal to start tracking deadlines.

@@ -9,18 +9,18 @@ interface CategoryDonutProps {
 
 export function CategoryDonut({ byCategory }: CategoryDonutProps) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
       <h2 className="text-base font-semibold text-foreground">By Category</h2>
-      <p className="mb-4 text-sm text-muted-foreground">Share of active annual spend</p>
+      <p className="mb-3 text-xs text-muted-foreground sm:mb-4 sm:text-sm">Share of active annual spend</p>
 
       {byCategory.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">No active renewals yet.</p>
       ) : (
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+        <div className="flex flex-row items-center gap-3 sm:gap-6">
           <Donut byCategory={byCategory} />
           <ul className="w-full space-y-2">
             {byCategory.map(row => (
-              <li key={row.category} className="flex items-center justify-between gap-3 text-sm">
+              <li key={row.category} className="flex items-center justify-between gap-3 text-xs sm:text-sm">
                 <span className="flex items-center gap-2 text-foreground">
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -50,7 +50,7 @@ function Donut({ byCategory }: { byCategory: CategoryBreakdownRow[] }) {
 
   return (
     <div
-      className="relative h-40 w-40 shrink-0 rounded-full"
+      className="relative h-24 w-24 shrink-0 rounded-full sm:h-40 sm:w-40"
       style={{ background: gradient }}
       role="img"
       aria-label="Spend share by category"

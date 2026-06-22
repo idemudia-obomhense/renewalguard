@@ -9,8 +9,8 @@ interface RenewalListProps {
 export function RenewalList({ renewals }: RenewalListProps) {
   if (renewals.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-        <Inbox className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+      <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center sm:p-10">
+        <Inbox className="mx-auto mb-3 h-6 w-6 text-muted-foreground sm:h-8 sm:w-8" />
         <p className="mb-1 text-sm font-medium text-foreground">No renewals found</p>
         <p className="text-sm text-muted-foreground">Try adjusting your filters or search.</p>
       </div>
