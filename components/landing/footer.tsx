@@ -9,8 +9,8 @@ const FOOTER_LINKS = [
 ]
 
 const LEGAL_LINKS = [
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Terms of Service', href: '#' },
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
 ]
 
 export function Footer() {
@@ -45,9 +45,9 @@ export function Footer() {
             <ul className="mt-3 space-y-2">
               {LEGAL_LINKS.map(link => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-muted-foreground transition-colors hover:text-foreground">
+                  <Link href={link.href} className="text-muted-foreground transition-colors hover:text-foreground">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

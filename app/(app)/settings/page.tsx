@@ -45,6 +45,15 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
       <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
         {tab === 'preferences' ? <PreferencesForm profile={profile} /> : <ProfileForm profile={profile} />}
       </div>
+
+      <p className="flex gap-4 text-sm text-muted-foreground">
+        <Link href="/privacy" className="transition-colors hover:text-foreground">
+          Privacy Policy
+        </Link>
+        <Link href="/terms" className="transition-colors hover:text-foreground">
+          Terms of Service
+        </Link>
+      </p>
     </div>
   )
 }
