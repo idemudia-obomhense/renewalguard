@@ -242,5 +242,6 @@ export async function deleteRenewalAction(formData: FormData): Promise<void> {
 
   revalidatePath('/dashboard')
   revalidatePath('/renewals')
+  revalidatePath(`/renewals/${id}`)
   redirect('/renewals')
 }

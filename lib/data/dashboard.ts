@@ -16,6 +16,7 @@ async function getActiveRenewals(): Promise<Renewal[]> {
   const { data, error } = await supabase
     .from('renewals')
     .select('*')
+    .is('deleted_at', null)
     .eq('status', 'active')
     .order('renewal_date', { ascending: true })
 
